@@ -14,28 +14,32 @@ import javax.servlet.http.HttpServletResponse;
 
 import model.projectboard.ProjectBoardDAO2;
 import model.projectboard.ProjectBoardDTO;
-import utils.BoardPage;
+import util.BoardPage;
 
-@WebServlet("/Model2Board/List.do")
+@WebServlet("/community/List.do")
 public class ListController extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
 			throws ServletException, IOException {
 		
+		String boardName = req.getParameter("boardName");
+		
 		//DB 연결
 		ProjectBoardDAO2 dao = new ProjectBoardDAO2();
 		
 		Map<String, Object> map = new HashMap<String, Object>();
+		 
+		map.put("boardName", boardName);	
 		
-		//검색어 파라미터 받기
-		String searchField = req.getParameter("searchField");
-		String searchWord = req.getParameter("searchWord");
+		//검색구역 & 검색어 파라미터 받기
+		String searchField = req.getParameter("keyField");
+		String searchWord = req.getParameter("keyString");
 		
 		//검색어를 입력했을때 파라미터 저장
 		if(searchWord != null) {
-			map.put("searchField", searchField);
-			map.put("searchWord", searchWord);
+			map.put("keyField", searchField);
+			map.put("keyString", searchWord);
 		}
 		
 		//게시물의 개수를 카운트
@@ -46,11 +50,11 @@ public class ListController extends HttpServlet {
 		//페이지당 게시물 수 & 블록 당 페이지 수
 		int pageSize = Integer.parseInt(application.getInitParameter("POSTS_PER_PAGE"));
 		int blockPage = Integer.parseInt(application.getInitParameter("PAGES_PER_BLOCK"));
-		//페이지 수
+		//기본 페이지 번호
 		int pageNum = 1;
-		//파라미터로 받아온 페이지 수
+		//파라미터로 받아온 페이지 번호
 		String pageTemp = req.getParameter("pageNum");
-		//파라미터 값 검증 후 페이지수 변경
+		//파라미터 값 검증 후 페이지 번호 변경
 		if(pageTemp != null && !pageTemp.equals(""))
 			pageNum = Integer.parseInt(pageTemp);
 		
@@ -66,10 +70,27 @@ public class ListController extends HttpServlet {
 		List<ProjectBoardDTO> boardLists = dao.selectList(map);
 		dao.close();
 		
+		
+		//페이지 번호 생성
 		String pagingImg = BoardPage.pagingStr(totalCount, pageSize, blockPage, pageNum, 
-				"../mvcboard/list.do");
+				"../community/List.do?boardName="+boardName);
 		
+		map.put("pagingImg", pagingImg); //페이지 번호
+		map.put("totalCount", totalCount); //전체 게시물의 개수
+		map.put("pageSize", pageSize); //페이지 당 게시물 수
+		map.put("pageNum", pageNum); //페이지 번호
 		
+		//request 영역에 저장
+		req.setAttribute("boardLists", boardLists);
+		req.setAttribute("map", map);
+		req.setAttribute("bCRUD", "list");
+		req.setAttribute("boardName", boardName);
+		
+		//List 페이지로 포워드
+		if(boardName.equals("emp"))
+			req.getRequestDispatcher("sub01.jsp").forward(req, resp);
+		else if(boardName.equals("prt"))
+			req.getRequestDispatcher("sub02.jsp").forward(req, resp);	
 	}
 }
 

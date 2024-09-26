@@ -20,9 +20,9 @@
 </script>
 
  <body>
-
-	<!-- <center> -->
-	<div id="container-fluid">
+ <div class="container-fluid">
+	<center>
+	<div id="wrap">
 		<%@ include file="../include/top.jsp" %>
 
 		<img src="../images/member/sub_image.jpg" id="main_visual" />
@@ -73,6 +73,7 @@
 	
 
 	<%@ include file="../include/footer.jsp" %>
-	<!-- </center> -->
- </body>
+	</center>
+</div>
+</body>
 </html>
